@@ -1,0 +1,21 @@
+
+.highlight {
+  /* Add any additional styles for highlighted keywords here */
+}
+
+#keywordInput, #addKeywordButton, #clearHighlightsButton, #clearKeywordsButton {
+  margin-bottom: 10px;
+}
+#keywordsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.color-circle {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
