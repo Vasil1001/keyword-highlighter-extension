@@ -19,3 +19,12 @@
   border-radius: 50%;
   margin-right: 5px;
 }
+
+.removeKeyword {
+  margin-left: 10px;
+  color: red;
+  border: none;
+  background: none;
+  cursor: pointer;
+  margin-right: 4px;
+}

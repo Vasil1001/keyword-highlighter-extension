@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
     chrome.storage.local.get(["counts"], function (storage) {
       const counts = storage.counts || {};
       result.keywords.forEach((keyword) => {
-        let keywordElement = `<li>${keyword}`;
+        let keywordElement = `<li><button class="removeKeyword" data-keyword="${keyword}">x</button> ${keyword} `;
         if (counts[keyword]) {
           keywordElement += ` (${counts[keyword]})`;
         } else {
@@ -117,4 +117,50 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   });
+});
+
+document.body.addEventListener("click", function (event) {
+  if (event.target.classList.contains("removeKeyword")) {
+    const keywordToRemove = event.target.getAttribute("data-keyword");
+    chrome.storage.sync.get({ keywords: [] }, function (result) {
+      const newKeywords = result.keywords.filter(
+        (keyword) => keyword !== keywordToRemove
+      );
+      chrome.storage.sync.set({ keywords: newKeywords }, function () {
+        chrome.storage.local.get(["counts"], function (storage) {
+          const counts = storage.counts || {};
+          delete counts[keywordToRemove]; // Remove the count for the removed keyword
+          chrome.storage.local.set({ counts: counts }, function () {
+            chrome.tabs.query(
+              { active: true, currentWindow: true },
+              function (tabs) {
+                if (tabs.length > 0) {
+                  chrome.tabs.sendMessage(tabs[0].id, {
+                    action: "highlight",
+                    keywords: newKeywords,
+                  });
+                }
+              }
+            );
+            document.getElementById("keywordsList").innerHTML = "";
+            newKeywords.forEach((keyword) => {
+              let keywordElement = `<li><button class="removeKeyword" data-keyword="${keyword}">x</button> ${keyword} `;
+              if (counts[keyword]) {
+                keywordElement += ` (${counts[keyword]})`;
+              } else {
+                keywordElement += ` (0)`;
+              }
+              keywordElement += "</li>";
+              document.getElementById("keywordsList").innerHTML +=
+                keywordElement;
+            });
+            const totalCount = Object.values(counts).reduce((a, b) => a + b, 0);
+            document.getElementById(
+              "highlightCount"
+            ).textContent = `Total matches found: ${totalCount}`;
+          });
+        });
+      });
+    });
+  }
 });
